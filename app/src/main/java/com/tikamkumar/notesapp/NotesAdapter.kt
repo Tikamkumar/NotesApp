@@ -2,18 +2,24 @@ package com.tikamkumar.notesapp
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 class NotesAdapter(private var notes: List<Note>, context: Context):
     RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
 
+    private val db = NoteDatabaseHelper(context)
     class NoteViewHolder(itemVie: View): RecyclerView.ViewHolder(itemVie) {
         val titleTextView: TextView = itemVie.findViewById(R.id.titleTextView)
         val contentTextView = itemVie.findViewById<TextView>(R.id.contentTextView)
+        val updateButton: ImageView = itemVie.findViewById(R.id.updateButton)
+        val deleteButton: ImageView = itemVie.findViewById(R.id.deleteButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
@@ -27,6 +33,17 @@ class NotesAdapter(private var notes: List<Note>, context: Context):
         val note = notes[position]
         holder.titleTextView.text = note.title
         holder.contentTextView.text = note.content
+        holder.updateButton.setOnClickListener {
+            val intent = Intent(holder.itemView.context, UpdateActivity::class.java)
+            intent.putExtra("note_id", note.id)
+            holder.itemView.context.startActivity(intent)
+        }
+
+        holder.deleteButton.setOnClickListener {
+            db.deleteNote(note.id)
+            refreshData(db.getAllNotes())
+            Toast.makeText(holder.itemView.context, "Note Deleted..", Toast.LENGTH_SHORT).show()
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
